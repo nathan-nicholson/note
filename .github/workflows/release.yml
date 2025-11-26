@@ -1,8 +1,11 @@
-name: Release
+name: goreleaser
 
 on:
-  release:
-    types: [published]
+  pull_request:
+  push:
+    # run only against tags
+    tags:
+      - "*"
 
 permissions:
   contents: write
@@ -20,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: "1.24"
 
       - name: Install cross-compilation tools
         run: |
@@ -35,4 +38,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}

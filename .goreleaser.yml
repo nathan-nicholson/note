@@ -10,14 +10,13 @@ builds:
     binary: note
     main: ./main.go
     env:
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0 # Disable CGO for easier cross-compilation
     goos:
       - linux
       - darwin
     goarch:
       - amd64
       - arm64
-    # Cross-compilation settings for CGO
     flags:
       - -trimpath
     ldflags:
@@ -81,7 +80,7 @@ archives:
       - LICENSE*
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 snapshot:
   version_template: "{{ incpatch .Version }}-next"
@@ -91,19 +90,19 @@ changelog:
   use: github
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore:'
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
       - Merge pull request
       - Merge branch
   groups:
     - title: Features
       regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
       order: 0
-    - title: 'Bug fixes'
+    - title: "Bug fixes"
       regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
       order: 1
-    - title: 'Performance improvements'
+    - title: "Performance improvements"
       regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
       order: 2
     - title: Others
@@ -134,11 +133,7 @@ brews:
     # formula - useful for testing
     skip_upload: false
 
-<<<<<<< Updated upstream
     # Directory inside the repository to put the formula
-=======
-    # Folder inside the repository to put the formula
->>>>>>> Stashed changes
     directory: Formula
 
     # Dependencies
