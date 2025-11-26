@@ -15,10 +15,11 @@ func CreateTodo(db *sql.DB, content string, tags []string, dueDate *time.Time) (
 		dueDateSQL = dueDate.Format("2006-01-02")
 	}
 
+	now := time.Now()
 	result, err := db.Exec(`
 		INSERT INTO todos (content, due_date, created_at, updated_at)
-		VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-	`, content, dueDateSQL)
+		VALUES (?, ?, ?, ?)
+	`, content, dueDateSQL, now, now)
 	if err != nil {
 		return nil, err
 	}
@@ -136,30 +137,34 @@ func ListTodos(db *sql.DB, opts TodoListOptions) ([]models.Todo, error) {
 }
 
 func CompleteTodo(db *sql.DB, id int) error {
+	now := time.Now()
 	_, err := db.Exec(`
 		UPDATE todos
-		SET is_complete = 1, completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+		SET is_complete = 1, completed_at = ?, updated_at = ?
 		WHERE id = ?
-	`, id)
+	`, now, now, id)
 	return err
 }
 
 func UncompleteTodo(db *sql.DB, id int) error {
+	now := time.Now()
 	_, err := db.Exec(`
 		UPDATE todos
-		SET is_complete = 0, completed_at = NULL, updated_at = CURRENT_TIMESTAMP
+		SET is_complete = 0, completed_at = NULL, updated_at = ?
 		WHERE id = ?
-	`, id)
+	`, now, id)
 	return err
 }
 
 func UpdateTodo(db *sql.DB, id int, content *string, tags []string, dueDate *time.Time, clearDueDate bool) error {
+	now := time.Now()
+
 	if content != nil {
 		_, err := db.Exec(`
 			UPDATE todos
-			SET content = ?, updated_at = CURRENT_TIMESTAMP
+			SET content = ?, updated_at = ?
 			WHERE id = ?
-		`, *content, id)
+		`, *content, now, id)
 		if err != nil {
 			return err
 		}
@@ -168,18 +173,18 @@ func UpdateTodo(db *sql.DB, id int, content *string, tags []string, dueDate *tim
 	if clearDueDate {
 		_, err := db.Exec(`
 			UPDATE todos
-			SET due_date = NULL, updated_at = CURRENT_TIMESTAMP
+			SET due_date = NULL, updated_at = ?
 			WHERE id = ?
-		`, id)
+		`, now, id)
 		if err != nil {
 			return err
 		}
 	} else if dueDate != nil {
 		_, err := db.Exec(`
 			UPDATE todos
-			SET due_date = ?, updated_at = CURRENT_TIMESTAMP
+			SET due_date = ?, updated_at = ?
 			WHERE id = ?
-		`, dueDate.Format("2006-01-02"), id)
+		`, dueDate.Format("2006-01-02"), now, id)
 		if err != nil {
 			return err
 		}
@@ -189,7 +194,7 @@ func UpdateTodo(db *sql.DB, id int, content *string, tags []string, dueDate *tim
 		if err := ReplaceTodoTags(db, id, tags); err != nil {
 			return err
 		}
-		_, err := db.Exec("UPDATE todos SET updated_at = CURRENT_TIMESTAMP WHERE id = ?", id)
+		_, err := db.Exec("UPDATE todos SET updated_at = ? WHERE id = ?", now, id)
 		if err != nil {
 			return err
 		}
