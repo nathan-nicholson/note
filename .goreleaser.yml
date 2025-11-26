@@ -1,0 +1,198 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: note
+    binary: note
+    main: ./main.go
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    # Cross-compilation settings for CGO
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/nathan-nicholson/note/internal/version.Version={{.Version}}
+    overrides:
+      - goos: darwin
+        goarch: amd64
+        env:
+          - CC=o64-clang
+          - CXX=o64-clang++
+        tags:
+          - netgo
+      - goos: darwin
+        goarch: arm64
+        env:
+          - CC=oa64-clang
+          - CXX=oa64-clang++
+        tags:
+          - netgo
+      - goos: linux
+        goarch: amd64
+        env:
+          - CC=gcc
+      - goos: linux
+        goarch: arm64
+        env:
+          - CC=aarch64-linux-gnu-gcc
+
+  # Windows build with CGO disabled (simpler for cross-compilation)
+  - id: note-windows
+    binary: note
+    main: ./main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/nathan-nicholson/note/internal/version.Version={{.Version}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Bug fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Performance improvements'
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Others
+      order: 999
+
+brews:
+  - name: note
+    repository:
+      owner: nathan-nicholson
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+
+    # Git author used to commit to the repository
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+
+    # Your app's homepage
+    homepage: "https://github.com/nathan-nicholson/note"
+
+    # Your app's description
+    description: "A lightweight CLI tool for capturing quick notes and managing todos with project-based organization"
+
+    # License
+    license: "MIT"
+
+    # Setting this will prevent goreleaser to actually try to commit the updated
+    # formula - useful for testing
+    skip_upload: false
+
+    # Folder inside the repository to put the formula
+    folder: Formula
+
+    # Dependencies
+    dependencies:
+      - name: sqlite
+
+    # Install script
+    install: |
+      bin.install "note"
+
+    # Test script
+    test: |
+      system "#{bin}/note", "--help"
+
+release:
+  github:
+    owner: nathan-nicholson
+    name: note
+
+  # If set to true, will not auto-publish the release
+  draft: false
+
+  # Whether to remove existing draft releases with the same name before creating
+  # a new one
+  replace_existing_draft: true
+
+  # Useful if you want to delay the creation of the tag in the remote
+  disable: false
+
+  # Set this to true if you want to disable just the artifact upload to the SCM
+  skip_upload: false
+
+  prerelease: auto
+
+  # What to do with the release notes in case there the release already exists
+  mode: append
+
+  header: |
+    ## Installation
+
+    ### Homebrew (macOS/Linux)
+    ```bash
+    brew install nathan-nicholson/tap/note
+    ```
+
+    ### Download binary
+    Download the appropriate binary for your platform from the assets below.
+
+  footer: |
+    ## Verify Installation
+
+    After installation, verify by running:
+    ```bash
+    note --help
+    ```
+
+    ---
+    **Full Changelog**: https://github.com/nathan-nicholson/note/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+announce:
+  skip: false
