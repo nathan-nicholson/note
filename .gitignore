@@ -37,3 +37,6 @@ go.work
 # Temporary files
 tmp/
 temp/
+
+# GoReleaser build directory
+dist/
