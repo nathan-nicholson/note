@@ -78,3 +78,40 @@ func TestTodoCreatedAtNotInFuture(t *testing.T) {
 			beforeCreate.Sub(todo.CreatedAt))
 	}
 }
+
+func TestProjectCreatedAtNotInFuture(t *testing.T) {
+	db := setupTestDB(t)
+
+	// Capture time before creating project
+	beforeCreate := time.Now()
+
+	// Create a project
+	project, err := CreateProject(db, "test-project", []string{})
+	if err != nil {
+		t.Fatalf("CreateProject failed: %v", err)
+	}
+
+	// Capture time after creating project
+	afterCreate := time.Now()
+
+	// The created_at should be between beforeCreate and afterCreate
+	// It should NOT be in the future
+	if project.CreatedAt.After(afterCreate) {
+		t.Errorf("Project created_at is in the future!\n"+
+			"  Before create: %v\n"+
+			"  Created at:    %v\n"+
+			"  After create:  %v\n"+
+			"  Difference:    %v",
+			beforeCreate, project.CreatedAt, afterCreate,
+			project.CreatedAt.Sub(afterCreate))
+	}
+
+	if project.CreatedAt.Before(beforeCreate) {
+		t.Errorf("Project created_at is before we called CreateProject!\n"+
+			"  Before create: %v\n"+
+			"  Created at:    %v\n"+
+			"  Difference:    %v",
+			beforeCreate, project.CreatedAt,
+			beforeCreate.Sub(project.CreatedAt))
+	}
+}
