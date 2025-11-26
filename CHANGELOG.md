@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/nathan-nicholson/note/compare/v1.0.1...v1.0.2) (2025-11-26)
+
+
+### Bug Fixes
+
+* add local timezone support to features list and fix gorelease flow ([#6](https://github.com/nathan-nicholson/note/issues/6)) ([27d4337](https://github.com/nathan-nicholson/note/commit/27d4337216f1ba55a0a5935012d42a445e581f89))
+
 ## [1.0.1](https://github.com/nathan-nicholson/note/compare/v1.0.0...v1.0.1) (2025-11-26)
 
 
