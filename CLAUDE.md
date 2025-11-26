@@ -1,5 +1,23 @@
 # CLAUDE.md - AI Assistant Guide for `note`
 
+> **Purpose**: This file serves as Claude Code's memory for the `note` project. It provides comprehensive context about the codebase structure, architecture, development practices, and conventions. Read this file carefully before making any code changes.
+
+## How to Use This Documentation
+
+**For Claude Code**:
+- **Before coding**: Review relevant sections to understand existing patterns
+- **When adding features**: Follow the "Common Tasks" section for step-by-step guidance
+- **When unsure**: Check "Code Conventions" and "Best Practices Summary"
+- **Before committing**: Review "Questions to Ask Before Making Changes"
+- **When stuck**: Consult the "Troubleshooting Guide"
+
+**When to ask for clarification vs. proceed**:
+- ✅ **Proceed autonomously** when task matches documented patterns (adding commands, fields, tests)
+- ✅ **Proceed autonomously** for bug fixes with clear root causes
+- ❓ **Ask for clarification** when user intent is ambiguous (multiple valid approaches)
+- ❓ **Ask for clarification** when changes would significantly alter architecture
+- ❓ **Ask for clarification** when breaking changes are required
+
 ## Project Overview
 
 `note` is a lightweight CLI tool written in Go for capturing quick notes and managing todos with project-based organization. It provides a keyboard-driven interface for thought capture, task tracking, and project management.
@@ -19,6 +37,26 @@
 - Display: fatih/color for terminal output
 - Build: GoReleaser for multi-platform releases
 - CI/CD: GitHub Actions with release-please
+
+### What Makes This Project Unique
+
+**Design Philosophy**:
+- **Simplicity First**: Minimal cognitive overhead for users
+- **Local-First**: All data stored locally in SQLite, no cloud dependencies
+- **Activity Awareness**: Automatic logging of significant events for context
+- **Project Context**: Automatic tagging based on active project eliminates manual organization
+
+**Key Architectural Decisions**:
+- **Global DB Connection**: Simplifies code but requires proper initialization order
+- **CGO Dependency**: SQLite requires CGO, complicating cross-compilation
+- **Migrations on Startup**: Schema changes applied automatically, no separate migration tool
+- **Natural Language Dates**: User-friendly input reduces friction
+
+**Notable Constraints**:
+- Single active project at a time (singleton pattern)
+- Project names must be kebab-case (enforced validation)
+- Migrations are append-only (never modify existing)
+- Activity notes created automatically (cannot be disabled)
 
 ## Repository Structure
 
@@ -312,6 +350,37 @@ func TestSomething(t *testing.T) {
 - Runs all migrations
 - Ensures clean state per test
 
+### Testing Strategy and Priorities
+
+**What to test thoroughly** (high value):
+1. **Repository layer** - All CRUD operations, edge cases, SQL correctness
+2. **Model validation** - Project name rules, data constraints
+3. **Date parsing** - All natural language formats, edge cases
+4. **Activity logging** - Verify notes created for events
+5. **Project auto-tagging** - Tags applied correctly
+
+**What to test lightly** (medium value):
+1. **Display formatters** - Sample output verification
+2. **Command parsing** - Flag handling, argument validation
+3. **Error messages** - User-facing error text
+
+**What can be tested manually** (lower priority for automation):
+1. **Terminal color output** - Visual inspection
+2. **Update checker** - External API integration
+3. **Cross-platform builds** - Handled by CI
+
+**Test Coverage Goals**:
+- Repository: Target 80%+ (currently ~48%)
+- Date parser: Maintain 95%+
+- Models: Target 90%+
+- Activity logger: Target 80%+
+
+**When adding new features**:
+- Write tests BEFORE or DURING implementation, not after
+- Test happy path AND error cases
+- Test edge cases (empty strings, null values, boundaries)
+- Add integration tests for multi-step workflows
+
 ## CI/CD Pipeline
 
 ### Continuous Integration (`.github/workflows/ci.yml`)
@@ -398,6 +467,9 @@ func TestSomething(t *testing.T) {
 - Use the repository layer for all database operations
 - Include error handling for all operations
 - Update tests when changing functionality
+- Run `make test` before committing
+- Use `gofmt` formatting (automatic with most editors)
+- Follow Go naming conventions (PascalCase for exports, camelCase for private)
 
 **NEVER**:
 - Modify `main.go` unless absolutely necessary
@@ -405,6 +477,26 @@ func TestSomething(t *testing.T) {
 - Skip validation in model layer
 - Add dependencies without justification
 - Create new global variables
+- Commit code that doesn't pass tests
+- Use `panic()` except in `init()` or truly unrecoverable situations
+- Ignore golangci-lint warnings without good reason
+
+### Code Quality Standards
+
+**Go Best Practices**:
+- Use meaningful variable names (avoid single letters except loop counters)
+- Keep functions focused and small (prefer <50 lines)
+- Return errors, don't panic
+- Use `defer` for cleanup (database connections, file handles)
+- Avoid naked returns in functions >10 lines
+- Use `context.Context` for cancellation in future additions
+
+**This Codebase Specifically**:
+- Database operations always use prepared statements (SQL injection prevention)
+- All user-facing strings go through display formatters
+- Error messages should be actionable (tell user what to do)
+- Commands should work with or without flags (sensible defaults)
+- Prefer explicit over implicit (don't hide important operations)
 
 ### 2. Adding New Commands
 
@@ -619,6 +711,53 @@ func TestNewFeature(t *testing.T) {
 ```bash
 note version
 ```
+
+## Common Scenarios and How to Handle Them
+
+### Scenario: User asks "Add a search command"
+
+**Your approach**:
+1. Review existing commands in `cmd/` to understand patterns
+2. Check if repository layer has search capabilities (it doesn't - need to add)
+3. Follow "Task: Add a New Command" section below
+4. Add repository function for search
+5. Update display formatter for search results
+6. Add tests for search functionality
+7. Update README with search examples
+8. Commit with `feat: add search command for notes`
+
+### Scenario: User reports "Date parsing doesn't work for 'next friday'"
+
+**Your approach**:
+1. Check `internal/dateparse/parser.go` to see if "next friday" is supported
+2. Review existing test cases in `internal/dateparse/parser_test.go`
+3. Add test case that reproduces the issue
+4. Implement the new date format
+5. Verify test passes
+6. Check if README needs updating
+7. Commit with `fix: add support for 'next friday' date parsing`
+
+### Scenario: User asks "Why is the database slow?"
+
+**Your approach**:
+1. Ask clarifying questions about the specific operation that's slow
+2. Review relevant repository function in `internal/repository/`
+3. Check if indexes exist in `internal/database/migrations.go`
+4. Suggest adding indexes if missing
+5. Follow migration pattern to add index
+6. Test performance improvement
+7. Commit with `perf: add index to notes table for faster queries`
+
+### Scenario: User requests "Export notes to JSON"
+
+**Your approach**:
+1. Check if this fits existing command pattern or needs new command
+2. Decide: Should this be `note export` or `note list --format json`?
+3. Ask user for preference if ambiguous
+4. Implement based on decision
+5. Add tests for JSON export
+6. Update README
+7. Commit with `feat: add JSON export for notes`
 
 ## Common Tasks for AI Assistants
 
@@ -857,8 +996,38 @@ note version
 9. Does this change the user-facing API?
 10. Should this be documented in README?
 
+## File Organization and Imports
+
+### CLAUDE.md File Hierarchy
+
+This file is located at the repository root and provides project-wide context. Claude Code loads CLAUDE.md files recursively from the current directory up to the repository root.
+
+**For subdirectory-specific context**:
+- Create `subdirectory/CLAUDE.md` for component-specific guidance
+- More specific files build upon or refine base knowledge
+- Example: `internal/repository/CLAUDE.md` could document repository-specific patterns
+
+**For local-only context** (not committed to git):
+- Use `CLAUDE.local.md` for machine-specific settings
+- Add to `.gitignore` to prevent committing
+
+### Importing Additional Documentation
+
+This file can import other documentation using `@path/to/file` syntax:
+
+```markdown
+## Additional Context
+
+@./CONTRIBUTING.md
+@./docs/architecture.md
+```
+
+**Note**: Currently, all relevant context is self-contained in this file. Use imports if the file grows beyond ~1000 lines or if specific components need dedicated documentation.
+
 ---
 
 **Last Updated**: 2025-11-26
 **Codebase Version**: 1.0.0
 **Total Lines of Go Code**: ~1,268
+
+**Verification**: Use `/memory` command in Claude Code to verify this file is loaded.
