@@ -10,10 +10,11 @@ import (
 )
 
 func CreateNote(db *sql.DB, content string, tags []string, isImportant bool) (*models.Note, error) {
+	now := time.Now()
 	result, err := db.Exec(`
 		INSERT INTO notes (content, is_important, created_at, updated_at)
-		VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-	`, content, isImportant)
+		VALUES (?, ?, ?, ?)
+	`, content, isImportant, now, now)
 	if err != nil {
 		return nil, err
 	}
@@ -133,12 +134,14 @@ func ListNotes(db *sql.DB, opts NoteListOptions) ([]models.Note, error) {
 }
 
 func UpdateNote(db *sql.DB, id int, content *string, tags []string, isImportant *bool) error {
+	now := time.Now()
+
 	if content != nil {
 		_, err := db.Exec(`
 			UPDATE notes
-			SET content = ?, updated_at = CURRENT_TIMESTAMP
+			SET content = ?, updated_at = ?
 			WHERE id = ?
-		`, *content, id)
+		`, *content, now, id)
 		if err != nil {
 			return err
 		}
@@ -147,9 +150,9 @@ func UpdateNote(db *sql.DB, id int, content *string, tags []string, isImportant 
 	if isImportant != nil {
 		_, err := db.Exec(`
 			UPDATE notes
-			SET is_important = ?, updated_at = CURRENT_TIMESTAMP
+			SET is_important = ?, updated_at = ?
 			WHERE id = ?
-		`, *isImportant, id)
+		`, *isImportant, now, id)
 		if err != nil {
 			return err
 		}
@@ -159,7 +162,7 @@ func UpdateNote(db *sql.DB, id int, content *string, tags []string, isImportant 
 		if err := ReplaceNoteTags(db, id, tags); err != nil {
 			return err
 		}
-		_, err := db.Exec("UPDATE notes SET updated_at = CURRENT_TIMESTAMP WHERE id = ?", id)
+		_, err := db.Exec("UPDATE notes SET updated_at = ? WHERE id = ?", now, id)
 		if err != nil {
 			return err
 		}

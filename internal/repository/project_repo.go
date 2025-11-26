@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/nathan-nicholson/note/internal/models"
 )
@@ -12,10 +13,11 @@ func CreateProject(db *sql.DB, name string, tags []string) (*models.Project, err
 		return nil, err
 	}
 
+	now := time.Now()
 	result, err := db.Exec(`
 		INSERT INTO projects (name, created_at, is_closed)
-		VALUES (?, CURRENT_TIMESTAMP, 0)
-	`, name)
+		VALUES (?, ?, 0)
+	`, name, now)
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +98,8 @@ func SetActiveProject(db *sql.DB, projectID int) error {
 	}
 	defer tx.Rollback()
 
+	now := time.Now()
+
 	_, err = tx.Exec("DELETE FROM active_project")
 	if err != nil {
 		return err
@@ -103,17 +107,17 @@ func SetActiveProject(db *sql.DB, projectID int) error {
 
 	_, err = tx.Exec(`
 		INSERT INTO active_project (project_id, activated_at)
-		VALUES (?, CURRENT_TIMESTAMP)
-	`, projectID)
+		VALUES (?, ?)
+	`, projectID, now)
 	if err != nil {
 		return err
 	}
 
 	_, err = tx.Exec(`
 		UPDATE projects
-		SET first_activated_at = COALESCE(first_activated_at, CURRENT_TIMESTAMP)
+		SET first_activated_at = COALESCE(first_activated_at, ?)
 		WHERE id = ?
-	`, projectID)
+	`, now, projectID)
 	if err != nil {
 		return err
 	}
@@ -160,11 +164,12 @@ func ListProjects(db *sql.DB, includeAll bool) ([]models.Project, error) {
 }
 
 func CloseProject(db *sql.DB, projectID int) error {
+	now := time.Now()
 	_, err := db.Exec(`
 		UPDATE projects
-		SET is_closed = 1, closed_at = CURRENT_TIMESTAMP
+		SET is_closed = 1, closed_at = ?
 		WHERE id = ?
-	`, projectID)
+	`, now, projectID)
 	return err
 }
 
@@ -270,11 +275,12 @@ func GetCompleteTodosForProject(db *sql.DB, projectName string) ([]models.Todo, 
 }
 
 func UpdateProjectLastActivity(db *sql.DB, projectID int) error {
+	now := time.Now()
 	_, err := db.Exec(`
 		UPDATE projects
-		SET last_activity_at = CURRENT_TIMESTAMP
+		SET last_activity_at = ?
 		WHERE id = ?
-	`, projectID)
+	`, now, projectID)
 	return err
 }
 
