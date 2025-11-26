@@ -51,6 +51,7 @@ note project work
 - **Activity logging** - Automatic notes for todo and project lifecycle events
 - **Flexible tagging** - Tag notes and todos for easy filtering
 - **Date-based filtering** - Find notes by date range
+- **Local timezone support** - All timestamps use your local timezone
 
 ## Usage
 
