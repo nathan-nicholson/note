@@ -64,9 +64,6 @@ builds:
 
 archives:
   - id: default
-    formats:
-      - tar.gz
-      - zip
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -77,7 +74,6 @@ archives:
     files:
       - README.md
       - LICENSE*
-    rlcp: true
 
 checksum:
   name_template: "checksums.txt"
@@ -108,7 +104,7 @@ changelog:
     - title: Others
       order: 999
 
-homebrew:
+brews:
   - name: note
     repository:
       owner: nathan-nicholson
