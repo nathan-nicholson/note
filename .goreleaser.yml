@@ -64,7 +64,9 @@ builds:
 
 archives:
   - id: default
-    format: tar.gz
+    formats:
+      - tar.gz
+      - zip
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -72,12 +74,10 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    format_overrides:
-      - goos: windows
-        format: zip
     files:
       - README.md
       - LICENSE*
+    rlcp: true
 
 checksum:
   name_template: "checksums.txt"
@@ -108,7 +108,7 @@ changelog:
     - title: Others
       order: 999
 
-brews:
+homebrew:
   - name: note
     repository:
       owner: nathan-nicholson
