@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/nathan-nicholson/note/compare/v1.1.0...v1.1.1) (2025-11-27)
+
+
+### Bug Fixes
+
+* configure GoReleaser archives to include binaries ([#10](https://github.com/nathan-nicholson/note/issues/10)) ([83f3dbe](https://github.com/nathan-nicholson/note/commit/83f3dbe3755fb3e21681eba9460a95347e4c7aba))
+
 ## [1.1.0](https://github.com/nathan-nicholson/note/compare/v1.0.2...v1.1.0) (2025-11-27)
 
 
