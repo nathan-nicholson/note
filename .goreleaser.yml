@@ -65,6 +65,8 @@ builds:
 archives:
   - id: default
     format: tar.gz
+    builds:
+      - note
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -77,14 +79,14 @@ archives:
       - LICENSE*
   - id: windows
     format: zip
+    builds:
+      - note-windows
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
-    builds:
-      - note-windows
     files:
       - README.md
       - LICENSE*
