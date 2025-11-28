@@ -2,11 +2,7 @@ name: goreleaser
 
 on:
   release:
-    types: [created]
-  push:
-    # run only against tags
-    tags:
-      - "*"
+    types: [published]
 
 permissions:
   contents: write
