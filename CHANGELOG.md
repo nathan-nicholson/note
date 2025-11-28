@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/nathan-nicholson/note/compare/v1.1.2...v1.1.3) (2025-11-28)
+
+
+### Bug Fixes
+
+* update goreleaser workflow trigger to published event ([0fa0faf](https://github.com/nathan-nicholson/note/commit/0fa0faf5bddcd9c5fc2185c10c17b801b7e4f2c3))
+
 ## [1.1.2](https://github.com/nathan-nicholson/note/compare/v1.1.1...v1.1.2) (2025-11-28)
 
 
