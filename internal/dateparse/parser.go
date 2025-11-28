@@ -18,7 +18,7 @@ func ParseDate(input string) (time.Time, error) {
 
 	case "end-of-week":
 		daysUntilFriday := (5 - int(now.Weekday()) + 7) % 7
-		if daysUntilFriday == 0 && now.Weekday() != time.Friday {
+		if daysUntilFriday == 0 {
 			daysUntilFriday = 7
 		}
 		friday := now.AddDate(0, 0, daysUntilFriday)
