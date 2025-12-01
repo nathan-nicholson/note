@@ -1,8 +1,9 @@
 package version
 
 // Version is the current version of the application
-// This will be updated automatically by release-please
-var Version = "0.1.0"
+// This will be injected at build time via ldflags by GoReleaser
+// The default value "dev" is used for local development builds
+var Version = "dev"
 
 // GetVersion returns the current version
 func GetVersion() string {
