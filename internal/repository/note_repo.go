@@ -106,7 +106,7 @@ func ListNotes(db *sql.DB, opts NoteListOptions) ([]models.Note, error) {
 		query += fmt.Sprintf(" GROUP BY n.id HAVING COUNT(DISTINCT t.name) = %d", len(opts.Tags))
 	}
 
-	query += " ORDER BY n.created_at DESC"
+	query += " ORDER BY n.created_at ASC"
 
 	rows, err := db.Query(query, args...)
 	if err != nil {

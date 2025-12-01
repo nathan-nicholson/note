@@ -289,3 +289,71 @@ func TestDeleteNote(t *testing.T) {
 		}
 	})
 }
+
+func TestListNotes_ChronologicalOrder(t *testing.T) {
+	db := setupTestDB(t)
+
+	// Create notes with slight delays to ensure different timestamps
+	note1, err := CreateNote(db, "First note at 05:56 AM", []string{"test"}, false)
+	if err != nil {
+		t.Fatalf("Failed to create first note: %v", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+
+	note2, err := CreateNote(db, "Second note at 05:57 AM", []string{"test"}, false)
+	if err != nil {
+		t.Fatalf("Failed to create second note: %v", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+
+	note3, err := CreateNote(db, "Third note at 06:00 AM", []string{"test"}, false)
+	if err != nil {
+		t.Fatalf("Failed to create third note: %v", err)
+	}
+	time.Sleep(10 * time.Millisecond)
+
+	note4, err := CreateNote(db, "Fourth note at 06:03 AM", []string{"test"}, false)
+	if err != nil {
+		t.Fatalf("Failed to create fourth note: %v", err)
+	}
+
+	// List all notes
+	notes, err := ListNotes(db, NoteListOptions{})
+	if err != nil {
+		t.Fatalf("ListNotes() error = %v", err)
+	}
+
+	if len(notes) != 4 {
+		t.Fatalf("Expected 4 notes, got %d", len(notes))
+	}
+
+	// Verify chronological order (oldest first, newest last)
+	// The first note in the list should be the oldest (note1)
+	if notes[0].ID != note1.ID {
+		t.Errorf("First note in list should be note1 (ID %d), got ID %d with content %q",
+			note1.ID, notes[0].ID, notes[0].Content)
+	}
+
+	if notes[1].ID != note2.ID {
+		t.Errorf("Second note in list should be note2 (ID %d), got ID %d with content %q",
+			note2.ID, notes[1].ID, notes[1].Content)
+	}
+
+	if notes[2].ID != note3.ID {
+		t.Errorf("Third note in list should be note3 (ID %d), got ID %d with content %q",
+			note3.ID, notes[2].ID, notes[2].Content)
+	}
+
+	if notes[3].ID != note4.ID {
+		t.Errorf("Fourth note in list should be note4 (ID %d), got ID %d with content %q",
+			note4.ID, notes[3].ID, notes[3].Content)
+	}
+
+	// Verify timestamps are in ascending order
+	for i := 0; i < len(notes)-1; i++ {
+		if notes[i].CreatedAt.After(notes[i+1].CreatedAt) {
+			t.Errorf("Notes not in chronological order: note[%d] (%v) is after note[%d] (%v)",
+				i, notes[i].CreatedAt, i+1, notes[i+1].CreatedAt)
+		}
+	}
+}
