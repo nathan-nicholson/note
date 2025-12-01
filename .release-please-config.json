@@ -1,0 +1,14 @@
+{
+  "release-type": "go",
+  "packages": {
+    ".": {
+      "extra-files": [
+        {
+          "type": "plain",
+          "path": "internal/version/version.go",
+          "glob": false
+        }
+      ]
+    }
+  }
+}

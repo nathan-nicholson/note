@@ -1,7 +1,10 @@
 .PHONY: build install test test-verbose test-coverage clean
 
+# Get version from git tag or use "dev" for local builds
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+
 build:
-	go build -o note main.go
+	go build -ldflags "-X github.com/nathan-nicholson/note/internal/version.Version=$(VERSION)" -o note main.go
 
 install:
 	go install
