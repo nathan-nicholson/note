@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/nathan-nicholson/note/compare/v1.2.0...v1.2.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* enable CGO for SQLite support and improve version handling ([feb51bf](https://github.com/nathan-nicholson/note/commit/feb51bf5e95a55bdbdb5643d019207353fae9738))
+
 ## [1.2.0](https://github.com/nathan-nicholson/note/compare/v1.1.3...v1.2.0) (2025-11-28)
 
 
