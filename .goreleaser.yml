@@ -6,13 +6,28 @@ before:
     - go test ./...
 
 builds:
-  - id: note
+  - id: note-linux
     binary: note
     main: ./main.go
     env:
       - CGO_ENABLED=1
     goos:
       - linux
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/nathan-nicholson/note/internal/version.Version={{.Version}}
+
+  - id: note-darwin
+    binary: note
+    main: ./main.go
+    env:
+      - CGO_ENABLED=1
+    goos:
       - darwin
     goarch:
       - amd64
