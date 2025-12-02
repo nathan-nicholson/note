@@ -10,7 +10,7 @@ builds:
     binary: note
     main: ./main.go
     env:
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0 # Disable CGO for easier cross-compilation
     goos:
       - linux
       - darwin

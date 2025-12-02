@@ -32,11 +32,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Zig
-        uses: goto-bus-stop/setup-zig@v2
-        with:
-          version: 0.11.0
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -50,5 +45,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CC: zig cc
-          CXX: zig c++
