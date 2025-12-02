@@ -81,25 +81,15 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install cross-compilation tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
 
-    - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@v6
-      with:
-        distribution: goreleaser
-        version: latest
-        args: build --id=note-linux --snapshot --clean
-      env:
-        CC_FOR_linux_arm64: aarch64-linux-gnu-gcc
-        CXX_FOR_linux_arm64: aarch64-linux-gnu-g++
+    - name: Build Linux amd64 with CGO
+      run: |
+        CGO_ENABLED=1 go build -trimpath -ldflags="-s -w" -o note-linux-amd64 main.go
+        ./note-linux-amd64 version
 
   lint:
     name: Lint
