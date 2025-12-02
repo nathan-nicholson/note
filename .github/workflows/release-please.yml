@@ -43,7 +43,7 @@ jobs:
         if: matrix.goos == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -58,3 +58,5 @@ jobs:
           args: release --id=note-${{ matrix.goos }} --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CC_FOR_linux_arm64: aarch64-linux-gnu-gcc
+          CXX_FOR_linux_arm64: aarch64-linux-gnu-g++
